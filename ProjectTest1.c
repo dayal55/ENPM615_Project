@@ -9,8 +9,8 @@
 //Check all the malloc statements and free the space
 //Put all the functions below main and define them ago
 //Scan functions take two time values
-
-
+// Add check for date format
+// add check for end date greater than start date
 
 
 
@@ -175,16 +175,40 @@ int CompareDAT(NODE* node1, NODE* node2)
 	int con2 = node1->event.start_DAT.date == node2->event.start_DAT.date;
 	int con3 = node1->event.start_DAT.hour == node2->event.start_DAT.hour;
 	int con4 = node1->event.start_DAT.min == node2->event.start_DAT.min;
-	if(con1 && con2 && con3 && con4)
+
+	int con5 = node1->event.end_DAT.month == node2->event.end_DAT.month;
+	int con6 = node1->event.end_DAT.date == node2->event.end_DAT.date;
+	int con7 = node1->event.end_DAT.hour == node2->event.end_DAT.hour;
+	int con8 = node1->event.end_DAT.min == node2->event.end_DAT.min;
+	/*if(con1 && con2 && con3 && con4)
+	{
 		printf("Warning %s and %s have the same start time.\n",node1->event.name,node1->event.name);
+	}*/
 	if(node1->event.start_DAT.month > node2->event.start_DAT.month)
 		return 1;
-	else if(node1->event.start_DAT.date > node2->event.start_DAT.date)
+	else if(con1 && (node1->event.start_DAT.date > node2->event.start_DAT.date))
 		return 1;
-	else if(node1->event.start_DAT.hour > node2->event.start_DAT.hour)
+	else if(con1 && con2 && (node1->event.start_DAT.hour > node2->event.start_DAT.hour))
 		return 1;
-	else if(node1->event.start_DAT.min > node2->event.start_DAT.min)
+	else if(con1 && con2 && con3 && (node1->event.start_DAT.min > node2->event.start_DAT.min))
 		return 1;
+	else if(con1 && con2 && con3 && con4)
+	{
+		printf("Warning %s and %s have the same start time.\n",node1->event.name,node1->event.name);
+		if(node1->event.end_DAT.month > node2->event.end_DAT.month)
+			return 1;
+		else if(con5 && (node1->event.end_DAT.date > node2->event.end_DAT.date))
+			return 1;
+		else if(con5 && con6 && (node1->event.end_DAT.hour > node2->event.end_DAT.hour))
+			return 1;
+		else if(con5 && con6 && con7 && (node1->event.end_DAT.min > node2->event.end_DAT.min))
+			return 1;
+		else if(con5 && con6 && con7 && con8)
+		{
+			if(strcmp(node1->event.name,node2->event.name)>0)
+				return 0;
+		}
+	}
 	return 0;
 }
 
@@ -204,7 +228,7 @@ void PrintAll()
 	}
 }
 
-void NewEvent()
+int NewEvent()
 {
 	NODE* temp_node = NEW(NODE,1);
 	//scan event name
@@ -226,6 +250,7 @@ void NewEvent()
 	{
 		//CompareDAT will return 1 if curr time is greater than new node (temp_node)
 		//if that is the case than add temp node in the link list before curr node position
+		//printf("%d",CompareDAT(curr,temp_node));
 		if(CompareDAT(curr,temp_node))
 		{
 			if(curr == calender.head)
@@ -238,11 +263,14 @@ void NewEvent()
 				prev->next = temp_node;
 				temp_node->next = curr;
 			}
+			PrintAll();
+			return 0;
+
 		}
 		prev = curr;
 		curr = curr->next;
 	}
-	PrintAll();
+	return 0;
 }
 
 void DeleteEvent()
