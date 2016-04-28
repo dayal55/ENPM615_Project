@@ -228,6 +228,7 @@ void PrintAll()
 		printf("%s\n\n\n",curr->event.description);	
 		curr = curr->next;
 	}
+	
 }
 
 int NewEvent()
