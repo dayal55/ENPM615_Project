@@ -78,8 +78,9 @@ char* ScanEventName()
 {
 	printf("Enter new event name (no more than 16 characters):");
 	char* temp_title = NEW(char,17);
-	while(*fgets(temp_title,5000,stdin)==10);
-	//scanf("%[^\n]",temp_title);
+	while(*fgets(temp_title,5000,stdin)==10)
+		;
+    strtok(temp_title, "\n");
 	temp_title[16] = '\0';
 	int i;
 	for(i=0;i<16 && temp_title[i]!='\0';i++)
@@ -149,6 +150,7 @@ char* ScanEventDescription()
 	printf("Enter new event description (no more than 256 characters):");
 	char* temp_description = NEW(char,257);
 	fgets(temp_description,5000,stdin);
+	strtok(temp_description, "\n");
 	temp_description[256] = '\0';
 	int i;
 	for(i=0;i<256 && temp_description[i]!='\0';i++)
@@ -218,12 +220,12 @@ void PrintAll()
 	NODE* curr = calender.head;
 	while(curr!=NULL)
 	{
-		printf("%s",curr->event.name);
+		printf("%s\n",curr->event.name);
 		printf("%02d/%02d %02d:%02d\n",curr->event.start_DAT.month,curr->event.start_DAT.date,\
 			curr->event.start_DAT.hour,curr->event.start_DAT.min);
 		printf("%02d/%02d %02d:%02d\n",curr->event.end_DAT.month,curr->event.end_DAT.date,\
 			curr->event.end_DAT.hour,curr->event.end_DAT.min);
-		printf("%s\n\n",curr->event.description);	
+		printf("%s\n\n\n",curr->event.description);	
 		curr = curr->next;
 	}
 }
@@ -273,9 +275,32 @@ int NewEvent()
 	return 0;
 }
 
-void DeleteEvent()
+int DeleteEvent()
 {
+	char search_str[17];
+	printf("\nEnter the event name to be deleted:");
+	scanf("%s",search_str);
 
+	NODE* curr = calender.head;
+	NODE* prev = NULL;
+	while(curr != NULL)
+	{
+		if(strcmp(curr->event.name,search_str)==0)
+		{
+
+			printf("%s has been deleted\n",search_str);
+			if(curr == calender.head)
+				calender.head = curr->next;
+			else
+				prev->next = curr->next;
+			free(curr);
+			return 1;
+		}
+		prev = curr;
+		curr = curr->next;
+	}
+	printf("Error! %s not found\n",search_str);
+	return 0;
 }
 
 void ModifyEvent()
@@ -401,19 +426,24 @@ void CalenderGenerator(int argc, char* argv[])
         	NODE* current_event = NEW(NODE,1);
         	
         	//name of the event
+        	strtok(line, "\n");
         	strcpy(current_event->event.name,line);
 
         	//start date of the event
         	fgets(line, 15, fpr);
+        	strtok(line, "\n");
         	ConvertToDate(&current_event->event.start_DAT,line);
 
         	//end date of the event
         	fgets(line, 15, fpr);
+        	strtok(line, "\n");
         	ConvertToDate(&current_event->event.end_DAT,line);
 
         	//description of the event
         	fgets(line, 260, fpr);
+        	strtok(line, "\n");
         	strcpy(current_event->event.description,line);
+        	
         	//read empty line
         	fgets(line, 11, fpr);
         	fgets(line, 11, fpr);
