@@ -372,7 +372,7 @@ void CalenderGenerator(int argc, char* argv[])
         {
         	NODE* current_event = NEW(NODE,1);
         	
-        	//name of the event 
+        	//name of the event
         	strcpy(current_event->event.name,line);
 
         	//start date of the event
@@ -412,11 +412,13 @@ void CalenderGenerator(int argc, char* argv[])
 }
 int main(int argc, char* argv[])
 {
-	//CalenderGenerator(argc,argv);
+	CalenderGenerator(argc,argv);
 	printf("ENPM 615 Project\n\n");
-	PrintMainMenu();
-	//ask gang qu about printing menu how many times
-	while(OptionMainMenu());
-	PrintAll();
+	while(1)
+	{
+		PrintMainMenu();
+		//ask gang qu about printing menu how many times
+		while(OptionMainMenu());
+	}
 	return 0;
 }
