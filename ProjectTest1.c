@@ -13,7 +13,6 @@
 // add check for end date greater than start date
 
 
-
 //DAT = Date and Time
 typedef struct DAT{
 	int hour;
@@ -121,7 +120,8 @@ DAT* ScanStartDAT()
 {
 	char* temp_time = NEW(char,13);
 	printf("Enter new event start time (mm/dd hh:mm):");
-	fgets(temp_time,5000,stdin);
+	while(*fgets(temp_time,5000,stdin)==10);
+	strtok(temp_time, "\n");
 	DAT* dat = NEW(DAT,1);
 	ConvertToDate(dat,temp_time);
 	if(CheckDAT(dat)!=2)
@@ -135,7 +135,9 @@ DAT* ScanEndDAT()
 {
 	char* temp_time = NEW(char,13);
 	printf("Enter new event end time (mm/dd hh:mm):");
-	fgets(temp_time,5000,stdin);
+	while(*fgets(temp_time,5000,stdin)==10);
+	strtok(temp_time, "\n");
+	printf("%d\n",*temp_time);
 	DAT* dat = NEW(DAT,1);
 	ConvertToDate(dat,temp_time);
 	if(CheckDAT(dat)!=2)
@@ -213,40 +215,28 @@ int CompareDAT(NODE* node1, NODE* node2)
 	}
 	return 0;
 }
-
+void PrintNode(NODE* node)
+{
+	printf("%s\n",node->event.name);
+	printf("%02d/%02d %02d:%02d\n",node->event.start_DAT.month,node->event.start_DAT.date,\
+		node->event.start_DAT.hour,node->event.start_DAT.min);
+	printf("%02d/%02d %02d:%02d\n",node->event.end_DAT.month,node->event.end_DAT.date,\
+		node->event.end_DAT.hour,node->event.end_DAT.min);
+	printf("%s\n\n\n",node->event.description);
+}
 void PrintAll()
 {
 	//clear screen
 	NODE* curr = calender.head;
 	while(curr!=NULL)
 	{
-		printf("%s\n",curr->event.name);
-		printf("%02d/%02d %02d:%02d\n",curr->event.start_DAT.month,curr->event.start_DAT.date,\
-			curr->event.start_DAT.hour,curr->event.start_DAT.min);
-		printf("%02d/%02d %02d:%02d\n",curr->event.end_DAT.month,curr->event.end_DAT.date,\
-			curr->event.end_DAT.hour,curr->event.end_DAT.min);
-		printf("%s\n\n\n",curr->event.description);	
+		PrintNode(curr);	
 		curr = curr->next;
 	}
-	
+
 }
-
-int NewEvent()
+int InsertNode(NODE* temp_node)
 {
-	NODE* temp_node = NEW(NODE,1);
-	//scan event name
-	strcpy(temp_node->event.name,ScanEventName());
-
-	//scan event start time
-	temp_node->event.start_DAT = *ScanStartDAT();
-
-	//scan event end time
-	temp_node->event.end_DAT = *ScanEndDAT();
-
-	//scan event description
-	strcpy(temp_node->event.description,ScanEventDescription());
-
-	//add node to the link list
 	NODE* curr = calender.head;
 	NODE* prev = NULL;
 	while(curr!=NULL)
@@ -266,35 +256,55 @@ int NewEvent()
 				prev->next = temp_node;
 				temp_node->next = curr;
 			}
-			PrintAll();
 			return 0;
-
 		}
 		prev = curr;
 		curr = curr->next;
 	}
+	if(curr == calender.head)
+	{
+		temp_node->next = calender.head;
+		calender.head = temp_node;
+	}
+	else
+	{
+		prev->next = temp_node;
+		temp_node->next = curr;
+	}
+	return 0;
+}
+int NewEvent()
+{
+	NODE* temp_node = NEW(NODE,1);
+	//scan event name
+	strcpy(temp_node->event.name,ScanEventName());
+
+	//scan event start time
+	temp_node->event.start_DAT = *ScanStartDAT();
+
+	//scan event end time
+	temp_node->event.end_DAT = *ScanEndDAT();
+
+	//scan event description
+	strcpy(temp_node->event.description,ScanEventDescription());
+
+	//add node to the link list
+	InsertNode(temp_node);
 	return 0;
 }
 
-int DeleteEvent()
+int DeleteNode(char* search_str)
 {
-	char search_str[17];
-	printf("\nEnter the event name to be deleted:");
-	scanf("%s",search_str);
-
 	NODE* curr = calender.head;
 	NODE* prev = NULL;
 	while(curr != NULL)
 	{
 		if(strcmp(curr->event.name,search_str)==0)
 		{
-
-			printf("%s has been deleted\n",search_str);
 			if(curr == calender.head)
 				calender.head = curr->next;
 			else
 				prev->next = curr->next;
-			free(curr);
 			return 1;
 		}
 		prev = curr;
@@ -303,12 +313,84 @@ int DeleteEvent()
 	printf("Error! %s not found\n",search_str);
 	return 0;
 }
+int DeleteEvent()
+{
+	char search_str[17];
+	printf("\nEnter the event name to be deleted:");
+	scanf("%s",search_str);
+	DeleteNode(search_str);
+	printf("%s has been deleted\n",search_str);
+	return 0;
+}
+NODE* SearchNode(char* search_str)
+{
+	NODE* curr = calender.head;
+	NODE* prev = NULL;
+	while(curr != NULL)
+	{
+		if(strcmp(curr->event.name,search_str)==0)
+			return curr;
+		prev = curr;
+		curr = curr->next;
+	}
+	return NULL;
+}
+int OptionModifyEventMenu(NODE* temp_node)
+{
+	int option;
+	scanf("%d",&option);
+	NODE* ModifiedNode = NEW(NODE,1);
+	ModifiedNode = temp_node;
+	DeleteNode(temp_node->event.name);
+	switch(option)
+	{
+		case 1:
+		strcpy(ModifiedNode->event.name,ScanEventName());
+		break;
+
+		case 2:
+		ModifiedNode->event.start_DAT = *ScanStartDAT();
+		break;
+
+		case 3:
+		ModifiedNode->event.end_DAT = *ScanEndDAT();
+		break;
+
+		case 4:
+		strcpy(ModifiedNode->event.description,ScanEventDescription());
+		break;
+
+		default:
+		printf("Error! option between 1-4 expected\n");
+		return 1;
+	}
+	//PrintNode(ModifiedNode);	
+	InsertNode(ModifiedNode);
+	return 0;
+}
 
 void ModifyEvent()
 {
-
+	NODE* search_Node = NEW(NODE,1);
+	char* search_str = NEW(char,17);
+	while(1)
+	{
+		printf("Enter event name to modify:");
+		scanf("%s",search_str);
+		search_Node = SearchNode(search_str);
+		if(search_Node==NULL)
+			printf("Error! %s not found.\n",search_str);
+		else
+			break;
+	}
+	printf("Which field would you like to change?\n");
+	printf("1. Change event name:\n");
+	printf("2. Change start time:\n");
+	printf("3. Change end time:\n");
+	printf("4. Change description:\n");
+	while(OptionModifyEventMenu(search_Node))
+		;
 }
-
 
 void PrintTimeBlock()
 {
