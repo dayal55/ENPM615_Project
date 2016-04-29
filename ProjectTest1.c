@@ -6,7 +6,7 @@
 #define NEW(x,n) (x*) malloc(n*sizeof(x))
 
 
-//Check all the malloc statements and free the space
+//Check all the malloc statements and free the space - almost done checking remains
 //Put all the functions below main and define them ago
 //Scan functions take two time values
 // Add check for date format
@@ -122,7 +122,7 @@ char* ScanEventName()
 // 3 for timeblock start time
 // 4 for timeblock end time
 
-DAT* ScanDAT(int value)
+DAT ScanDAT(int value)
 {
 	char* temp_time = NEW(char,13);
 	switch(value)
@@ -145,31 +145,16 @@ DAT* ScanDAT(int value)
 	}
 	while(*fgets(temp_time,5000,stdin)==10);
 	strtok(temp_time, "\n");
-	DAT* dat = NEW(DAT,1);
-	ConvertToDate(dat,temp_time);
-	if(CheckDAT(dat)!=2)
+	DAT dat;
+	ConvertToDate(&dat,temp_time);
+	if(CheckDAT(&dat)!=2)
 	{
 		printf("Error! Date and Time format wrong\n");
 		return ScanDAT(value);
 	}
+	free(temp_time);
 	return dat;
 }
-/*DAT* ScanEndDAT()
-{
-	char* temp_time = NEW(char,13);
-	printf("Enter new event end time (mm/dd hh:mm):");
-	while(*fgets(temp_time,5000,stdin)==10);
-	strtok(temp_time, "\n");
-	printf("%d\n",*temp_time);
-	DAT* dat = NEW(DAT,1);
-	ConvertToDate(dat,temp_time);
-	if(CheckDAT(dat)!=2)
-	{
-		printf("Error! Date and Time format wrong\n");
-		return ScanEndDAT();
-	}
-	return dat;
-}*/
 char* ScanEventDescription()
 {
 	printf("Enter new event description (no more than 256 characters):");
@@ -319,10 +304,10 @@ int NewEvent()
 	strcpy(temp_node->event.name,ScanEventName());
 
 	//scan event start time
-	temp_node->event.start_DAT = *ScanDAT(1);
+	temp_node->event.start_DAT = ScanDAT(1);
 
 	//scan event end time
-	temp_node->event.end_DAT = *ScanDAT(2);
+	temp_node->event.end_DAT = ScanDAT(2);
 
 	//scan event description
 	strcpy(temp_node->event.description,ScanEventDescription());
@@ -344,6 +329,7 @@ int DeleteNode(char* search_str)
 				calender.head = curr->next;
 			else
 				prev->next = curr->next;
+			free(curr);
 			return 1;
 		}
 		prev = curr;
@@ -374,12 +360,13 @@ NODE* SearchNode(char* search_str)
 	}
 	return NULL;
 }
+
 int OptionModifyEventMenu(NODE* temp_node)
 {
 	int option;
 	scanf("%d",&option);
 	NODE* ModifiedNode = NEW(NODE,1);
-	ModifiedNode = temp_node;
+	*ModifiedNode = *temp_node;
 	DeleteNode(temp_node->event.name);
 	switch(option)
 	{
@@ -388,11 +375,11 @@ int OptionModifyEventMenu(NODE* temp_node)
 		break;
 
 		case 2:
-		ModifiedNode->event.start_DAT = *ScanDAT(1);
+		ModifiedNode->event.start_DAT = ScanDAT(1);
 		break;
 
 		case 3:
-		ModifiedNode->event.end_DAT = *ScanDAT(2);
+		ModifiedNode->event.end_DAT = ScanDAT(2);
 		break;
 
 		case 4:
@@ -403,6 +390,7 @@ int OptionModifyEventMenu(NODE* temp_node)
 		printf("Error! option between 1-4 expected\n");
 		return 1;
 	}
+
 	//PrintNode(ModifiedNode);	
 	InsertNode(ModifiedNode);
 	return 0;
@@ -429,12 +417,13 @@ void ModifyEvent()
 	printf("4. Change description:\n");
 	while(OptionModifyEventMenu(search_Node))
 		;
+	free(search_str);
 }
 
 void PrintTimeBlock()
 {
-	DAT start = *ScanDAT(3);
-	DAT end = *ScanDAT(4);
+	DAT start = ScanDAT(3);
+	DAT end = ScanDAT(4);
 	NODE* curr = calender.head;
 	int cond1,cond2;
 	while(curr!=NULL)
@@ -445,7 +434,6 @@ void PrintTimeBlock()
 			PrintNode(curr);
 		curr = curr->next;
 	}	
-	free(curr);
 }
 
 void PrintConflicts()
