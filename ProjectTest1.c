@@ -11,7 +11,11 @@
 //Scan functions take two time values
 // Add check for date format
 // add check for end date greater than start date
-
+//Saving in a file 
+//Documentation
+//Code is reused and copy pasted. Clean it.
+//Doubt: Event name is with # or without #
+//Add no input file feature
 
 //DAT = Date and Time
 typedef struct DAT{
@@ -489,7 +493,21 @@ void SearchName()
 
 void SearchKeyword()
 {
-
+	printf("Enter the event name:");
+	char* temp_str = NEW(char,17);
+	while(*fgets(temp_str,5000,stdin)==10)
+		;
+    strtok(temp_str, "\n");
+	NODE* curr = calender.head;
+	while(curr!=NULL)
+	{
+		if(strstr(curr->event.description,temp_str) != NULL)
+			PrintNode(curr);
+		else if(strstr(curr->event.name,temp_str) != NULL)
+			PrintNode(curr);
+		curr = curr->next;
+	} 
+	free(temp_str);
 }
 
 //User input of Main Menu
