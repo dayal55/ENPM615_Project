@@ -438,12 +438,43 @@ void PrintTimeBlock()
 
 void PrintConflicts()
 {
-
+	printf("Enter the event name:");
+	char* temp_str = NEW(char,17);
+	while(*fgets(temp_str,5000,stdin)==10)
+		;
+    strtok(temp_str, "\n");
+	NODE* node = SearchNode(temp_str);
+	if(node == NULL)
+	{
+		printf("No conflicting event.\n");
+		PrintConflicts();
+	}
+	else
+	{
+		NODE* curr = calender.head;
+		int cond1,cond2,confs=0;
+		while(curr!=NULL)
+		{
+			cond1 = CompareTime(node->event.end_DAT,curr->event.start_DAT) \
+				&& CompareTime(curr->event.end_DAT,node->event.start_DAT);
+			cond2 = CompareTime(node->event.start_DAT,curr->event.end_DAT) \
+				&& CompareTime(curr->event.start_DAT,node->event.end_DAT);	
+			if((cond1 || cond2) && node!=curr)
+			{
+				confs++;
+				PrintNode(curr);
+			}
+			curr = curr->next;
+		}
+	}
+	if(!confs)
+		printf("No conflicting event.\n");
+	free(temp_str);
 }
 
 void SearchName()
 {
-
+	
 }
 
 void SearchKeyword()
