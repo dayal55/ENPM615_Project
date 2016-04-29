@@ -116,10 +116,33 @@ char* ScanEventName()
 		return ScanEventName();
 	}
 }
-DAT* ScanStartDAT()
+//it will print statements according to the value
+// 1 for new event start date
+// 2 for new event end date
+// 3 for timeblock start time
+// 4 for timeblock end time
+
+DAT* ScanDAT(int value)
 {
 	char* temp_time = NEW(char,13);
-	printf("Enter new event start time (mm/dd hh:mm):");
+	switch(value)
+	{
+		case 1:
+		printf("Enter new event start time (mm/dd hh:mm):");
+		break;
+
+		case 2:
+		printf("Enter new event end time (mm/dd hh:mm):");
+		break;
+		
+		case 3:
+		printf("Enter a start time (mm/dd hh:mm):");
+		break;
+		
+		case 4:
+		printf("Enter a end time (mm/dd hh:mm):");
+		break;
+	}
 	while(*fgets(temp_time,5000,stdin)==10);
 	strtok(temp_time, "\n");
 	DAT* dat = NEW(DAT,1);
@@ -127,11 +150,11 @@ DAT* ScanStartDAT()
 	if(CheckDAT(dat)!=2)
 	{
 		printf("Error! Date and Time format wrong\n");
-		return ScanStartDAT();
+		return ScanDAT(value);
 	}
 	return dat;
 }
-DAT* ScanEndDAT()
+/*DAT* ScanEndDAT()
 {
 	char* temp_time = NEW(char,13);
 	printf("Enter new event end time (mm/dd hh:mm):");
@@ -146,7 +169,7 @@ DAT* ScanEndDAT()
 		return ScanEndDAT();
 	}
 	return dat;
-}
+}*/
 char* ScanEventDescription()
 {
 	printf("Enter new event description (no more than 256 characters):");
@@ -173,6 +196,25 @@ char* ScanEventDescription()
 	temp_description[255] = '#';
 	return temp_description;
 }
+int CompareTime(DAT time1, DAT time2)
+{
+	int con1 = time1.month == time2.month;
+	int con2 = time1.date == time2.date;
+	int con3 = time1.hour == time2.hour;
+	int con4 = time1.min == time2.min;
+
+	if(time1.month > time2.month)
+		return 1;
+	else if(con1 && (time1.date > time2.date))
+		return 1;
+	else if(con1 && con2 && (time1.hour > time2.hour))
+		return 1;
+	else if(con1 && con2 && con3 && (time1.min > time2.min))
+		return 1;
+	else if(con1 && con2 && con3 && con4)
+		return 1;
+	return 0;
+}
 int CompareDAT(NODE* node1, NODE* node2)
 {
 	int con1 = node1->event.start_DAT.month == node2->event.start_DAT.month;
@@ -184,10 +226,7 @@ int CompareDAT(NODE* node1, NODE* node2)
 	int con6 = node1->event.end_DAT.date == node2->event.end_DAT.date;
 	int con7 = node1->event.end_DAT.hour == node2->event.end_DAT.hour;
 	int con8 = node1->event.end_DAT.min == node2->event.end_DAT.min;
-	/*if(con1 && con2 && con3 && con4)
-	{
-		printf("Warning %s and %s have the same start time.\n",node1->event.name,node1->event.name);
-	}*/
+	
 	if(node1->event.start_DAT.month > node2->event.start_DAT.month)
 		return 1;
 	else if(con1 && (node1->event.start_DAT.date > node2->event.start_DAT.date))
@@ -280,10 +319,10 @@ int NewEvent()
 	strcpy(temp_node->event.name,ScanEventName());
 
 	//scan event start time
-	temp_node->event.start_DAT = *ScanStartDAT();
+	temp_node->event.start_DAT = *ScanDAT(1);
 
 	//scan event end time
-	temp_node->event.end_DAT = *ScanEndDAT();
+	temp_node->event.end_DAT = *ScanDAT(2);
 
 	//scan event description
 	strcpy(temp_node->event.description,ScanEventDescription());
@@ -349,11 +388,11 @@ int OptionModifyEventMenu(NODE* temp_node)
 		break;
 
 		case 2:
-		ModifiedNode->event.start_DAT = *ScanStartDAT();
+		ModifiedNode->event.start_DAT = *ScanDAT(1);
 		break;
 
 		case 3:
-		ModifiedNode->event.end_DAT = *ScanEndDAT();
+		ModifiedNode->event.end_DAT = *ScanDAT(2);
 		break;
 
 		case 4:
@@ -394,7 +433,19 @@ void ModifyEvent()
 
 void PrintTimeBlock()
 {
-
+	DAT start = *ScanDAT(3);
+	DAT end = *ScanDAT(4);
+	NODE* curr = calender.head;
+	int cond1,cond2;
+	while(curr!=NULL)
+	{
+		cond1 = CompareTime(end,curr->event.start_DAT) && CompareTime(curr->event.end_DAT,start);
+		cond2 = CompareTime(start,curr->event.end_DAT) && CompareTime(curr->event.start_DAT,end);	
+		if(cond1 || cond2)
+			PrintNode(curr);
+		curr = curr->next;
+	}	
+	free(curr);
 }
 
 void PrintConflicts()
