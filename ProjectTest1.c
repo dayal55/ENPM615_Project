@@ -466,15 +466,25 @@ void PrintConflicts()
 			}
 			curr = curr->next;
 		}
+		if(!confs)
+			printf("No conflicting event.\n");
 	}
-	if(!confs)
-		printf("No conflicting event.\n");
 	free(temp_str);
 }
 
 void SearchName()
 {
-	
+	printf("Enter the event name:");
+	char* temp_str = NEW(char,17);
+	while(*fgets(temp_str,5000,stdin)==10)
+		;
+    strtok(temp_str, "\n");
+	NODE* node = SearchNode(temp_str);
+	if(node == NULL)
+		printf("%s not found.\n",temp_str);
+	else
+		PrintNode(node);
+	free(temp_str);
 }
 
 void SearchKeyword()
