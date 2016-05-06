@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+
 #define YEAR 2016
 #define NEW(x,n) (x*) malloc(n*sizeof(x))
 
@@ -14,7 +15,7 @@
 //Saving in a file - done
 //Documentation
 //Code is reused and copy pasted. Clean it.
-//Doubt: Event name is with # or without #
+//Doubt: Event name is with # or without # - its with # my code is correct
 //Add no input file feature
 // Linklist datastructure update for count and tail
 // Check whether name is unique or not
@@ -257,6 +258,7 @@ void PrintNode(NODE* node)
 void PrintAll()
 {
 	//clear screen
+	system("clear");
 	NODE* curr = calender.head;
 	while(curr!=NULL)
 	{
@@ -320,6 +322,7 @@ int NewEvent()
 	strcpy(temp_node->event.description,ScanEventDescription());
 
 	//add node to the link list
+	InsertNode(temp_node);
 	return 0;
 }
 
@@ -530,6 +533,25 @@ void SaveOutput(int argc,char* argv[])
 	}
 	fclose(fpw);
 }
+//Function to print Main Menu
+void PrintMainMenu()
+{
+	//Add clear screen command
+	system("clear");
+	printf("Enter a number from the list below to select an option, or press 9 to quit.\n");
+	printf("\nEdit Commands\n");
+	printf("1. Add new Event\n");
+	printf("2. Delete Event\n");
+	printf("3. Modify Event\n");
+	printf("\nPrint Commands\n");
+	printf("4. Print all\n");
+	printf("5. Print time block\n");
+	printf("6. Print Conflicts\n");
+	printf("\nSearch Commands\n");
+	printf("7. Search by Name\n");
+	printf("8. Search by keyword\n");
+}
+
 //User input of Main Menu
 int OptionMainMenu(int argc,char* argv[])
 {
@@ -575,28 +597,15 @@ int OptionMainMenu(int argc,char* argv[])
 		exit(0);
 		break;
 
+		case 10:
+		PrintMainMenu();
+		break;
+		
 		default:
 		printf("Error! Option between 1-9 is expected.\n");
 		return 1;
 	}
 	return 0;
-}
-//Function to print Main Menu
-void PrintMainMenu()
-{
-	//Add clear screen command
-	printf("Enter a number from the list below to select an option, or press 9 to quit.\n");
-	printf("\nEdit Commands\n");
-	printf("1. Add new Event\n");
-	printf("2. Delete Event\n");
-	printf("3. Modify Event\n");
-	printf("\nPrint Commands\n");
-	printf("4. Print all\n");
-	printf("5. Print time block\n");
-	printf("6. Print Conflicts\n");
-	printf("\nSearch Commands\n");
-	printf("7. Search by Name\n");
-	printf("8. Search by keyword\n");
 }
 
 void init_Calender()
@@ -679,9 +688,10 @@ int main(int argc, char* argv[])
 {
 	CalenderGenerator(argc,argv);
 	printf("ENPM 615 Project\n\n");
+	PrintMainMenu();
 	while(1)
 	{
-		PrintMainMenu();
+		printf("Press 10 to print the main menu again.\n");
 		//ask gang qu about printing menu how many times
 		while(OptionMainMenu(argc,argv));
 	}
