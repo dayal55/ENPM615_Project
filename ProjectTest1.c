@@ -7,15 +7,17 @@
 
 
 //Check all the malloc statements and free the space - almost done checking remains
-//Put all the functions below main and define them ago
-//Scan functions take two time values
-// Add check for date format
-// add check for end date greater than start date
-//Saving in a file 
+//Put all the functions below main and define them ago - no need
+//Scan functions take two time values 
+// Add check for date format - done
+// add check for end date greater than start date - done
+//Saving in a file - done
 //Documentation
 //Code is reused and copy pasted. Clean it.
 //Doubt: Event name is with # or without #
 //Add no input file feature
+// Linklist datastructure update for count and tail
+// Check whether name is unique or not
 
 //DAT = Date and Time
 typedef struct DAT{
@@ -151,7 +153,7 @@ DAT ScanDAT(int value)
 	strtok(temp_time, "\n");
 	DAT dat;
 	ConvertToDate(&dat,temp_time);
-	if(CheckDAT(&dat)!=2)
+	if(CheckDAT(&dat)!=2 || temp_time[2]!='/' || temp_time[8]!=':')
 	{
 		printf("Error! Date and Time format wrong\n");
 		return ScanDAT(value);
@@ -307,17 +309,17 @@ int NewEvent()
 	//scan event name
 	strcpy(temp_node->event.name,ScanEventName());
 
+	do{
 	//scan event start time
 	temp_node->event.start_DAT = ScanDAT(1);
-
 	//scan event end time
 	temp_node->event.end_DAT = ScanDAT(2);
-
+	}while(!CompareTime(temp_node->event.end_DAT,temp_node->event.start_DAT));
+	
 	//scan event description
 	strcpy(temp_node->event.description,ScanEventDescription());
 
 	//add node to the link list
-	InsertNode(temp_node);
 	return 0;
 }
 
@@ -509,9 +511,27 @@ void SearchKeyword()
 	} 
 	free(temp_str);
 }
-
+void SaveOutput(int argc,char* argv[])
+{
+	NODE* curr = calender.head;
+	FILE* fpw;
+	remove(argv[argc-1]);
+	fpw = fopen(argv[argc-1],"w");
+	if (fpw == NULL)
+    	exit(EXIT_FAILURE);
+	while(curr!=NULL)
+	{
+		fprintf(fpw,"%s\n%02d/%02d %02d:%02d\n%02d/%02d %02d:%02d\n%s\n\n\n",\
+			curr->event.name,curr->event.start_DAT.month,curr->event.start_DAT.date,\
+			curr->event.start_DAT.hour,curr->event.start_DAT.min,curr->event.end_DAT.month,\
+			curr->event.end_DAT.date,curr->event.end_DAT.hour,curr->event.end_DAT.min,\
+			curr->event.description);
+		curr = curr->next;
+	}
+	fclose(fpw);
+}
 //User input of Main Menu
-int OptionMainMenu()
+int OptionMainMenu(int argc,char* argv[])
 {
 	int option;
 	scanf("%d",&option);
@@ -550,6 +570,8 @@ int OptionMainMenu()
 		break;
 
 		case 9:
+		SaveOutput(argc,argv);
+		PrintAll();
 		exit(0);
 		break;
 
@@ -593,6 +615,9 @@ void CalenderGenerator(int argc, char* argv[])
 	switch(argc)
 	{
 		case 2:
+		//I think nothing to do here
+		//May be have to add something later
+		//added because default won't word without this.
 		break;
 
 		case 3:
@@ -649,6 +674,7 @@ void CalenderGenerator(int argc, char* argv[])
 		exit(0);
 	}
 }
+
 int main(int argc, char* argv[])
 {
 	CalenderGenerator(argc,argv);
@@ -657,7 +683,7 @@ int main(int argc, char* argv[])
 	{
 		PrintMainMenu();
 		//ask gang qu about printing menu how many times
-		while(OptionMainMenu());
+		while(OptionMainMenu(argc,argv));
 	}
 	return 0;
 }
