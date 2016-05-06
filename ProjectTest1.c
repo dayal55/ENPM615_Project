@@ -15,8 +15,8 @@
 //Saving in a file - done
 //Documentation
 //Code is reused and copy pasted. Clean it.
-//Doubt: Event name is with # or without # - its with # my code is correct
-//Add no input file feature
+//Doubt: Event name is with # or without # - its with #, my code is correct
+//Add no input file feature - done
 // Linklist datastructure update for count and tail
 // Check whether name is unique or not
 
@@ -47,7 +47,7 @@ typedef struct LL{
 }LL;
 
 //Global Varialbe for calender linkedlist
-LL calender;
+LL calender = {.head = NULL, .tail=NULL, .number_of_nodes=0};
 
 void ConvertToDate(DAT* dat,char* line)
 {
@@ -316,6 +316,8 @@ int NewEvent()
 	temp_node->event.start_DAT = ScanDAT(1);
 	//scan event end time
 	temp_node->event.end_DAT = ScanDAT(2);
+	if(CompareTime(temp_node->event.end_DAT,temp_node->event.start_DAT))
+		printf("Error! Start time must be less than end time.\n");
 	}while(!CompareTime(temp_node->event.end_DAT,temp_node->event.start_DAT));
 	
 	//scan event description
@@ -385,10 +387,20 @@ int OptionModifyEventMenu(NODE* temp_node)
 
 		case 2:
 		ModifiedNode->event.start_DAT = ScanDAT(1);
+		while(!CompareTime(temp_node->event.end_DAT,temp_node->event.start_DAT))
+		{
+			printf("Error! Start time must be less than end time.\n");
+			ModifiedNode->event.start_DAT = ScanDAT(1);
+		}
 		break;
 
 		case 3:
 		ModifiedNode->event.end_DAT = ScanDAT(2);
+		while(!CompareTime(temp_node->event.end_DAT,temp_node->event.start_DAT))
+		{
+			printf("Error! Start time must be less than end time.\n");
+			ModifiedNode->event.end_DAT = ScanDAT(2);
+		}
 		break;
 
 		case 4:
@@ -600,7 +612,7 @@ int OptionMainMenu(int argc,char* argv[])
 		case 10:
 		PrintMainMenu();
 		break;
-		
+
 		default:
 		printf("Error! Option between 1-9 is expected.\n");
 		return 1;
@@ -608,25 +620,16 @@ int OptionMainMenu(int argc,char* argv[])
 	return 0;
 }
 
-void init_Calender()
-{
-	calender.head=NULL;
-	calender.tail=NULL;
-	calender.number_of_nodes=0;
-}
-
-
 //This function assumes that input file is in correct format and would not check name or date and time.
 void CalenderGenerator(int argc, char* argv[])
 {
-	init_Calender();
 	FILE* fpr;
 	switch(argc)
 	{
 		case 2:
 		//I think nothing to do here
 		//May be have to add something later
-		//added because default won't word without this.
+		//added because default won't work without this.
 		break;
 
 		case 3:
@@ -691,7 +694,7 @@ int main(int argc, char* argv[])
 	PrintMainMenu();
 	while(1)
 	{
-		printf("Press 10 to print the main menu again.\n");
+		printf("\nEnter your choice. Press 10 to print the main menu again.\n");
 		//ask gang qu about printing menu how many times
 		while(OptionMainMenu(argc,argv));
 	}
