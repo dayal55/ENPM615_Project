@@ -17,10 +17,11 @@
 //Code is reused and copy pasted. Clean it.
 //Doubt: Event name is with # or without # - its with #, my code is correct
 //Add no input file feature - done
-// Linklist datastructure update for count and tail
-// Check whether name is unique or not
+// Linklist data structure update for count and tail
+// Check whether name is unique or not - done
 
 //DAT = Date and Time
+//date and time is divided into four integers.
 typedef struct DAT{
 	int hour;
 	int min;
@@ -28,6 +29,7 @@ typedef struct DAT{
 	int month;
 }DAT;
 
+//Event structure with parameters
 typedef struct EVENT{
 	char name[20];
 	DAT start_DAT;
@@ -35,28 +37,35 @@ typedef struct EVENT{
 	char description[260];
 }EVENT;
 
+//Node structure is used to create linkedlist of events.
+//It has event and pointer to the next event
 typedef struct NODE{
 	EVENT event;
 	struct NODE* next;
 }NODE;
 
+//Linkedlist contains head, tail and number of nodes of the linklist
+//Currently only head is used
 typedef struct LL{
 	NODE* head;
 	NODE* tail;
 	int number_of_nodes;
 }LL;
 
-//Global Varialbe for calender linkedlist
+//Global Variable for calender linkedlist
 LL calender = {.head = NULL, .tail=NULL, .number_of_nodes=0};
 
+//Convert string date format to DAT structure.
 void ConvertToDate(DAT* dat,char* line)
 {
-	//-48 for char to int converstion
+	//-48 for char to int conversion
 	dat->month = 10*(line[0]-48)+(line[1]-48);
 	dat->date = 10*(line[3]-48)+(line[4]-48);
 	dat->hour = 10*(line[6]-48)+(line[7]-48);
 	dat->min = 10*(line[9]-48)+(line[10]-48);
 }
+
+//Check whether name is alphanumeric or not
 int CheckAN(char* str)
 {
 	while(*str!='#')
@@ -67,6 +76,8 @@ int CheckAN(char* str)
 	}
 	return 1;
 }
+
+//Check if date and time is in correct format or not.
 int CheckDAT(DAT* dat)
 {
 	int legit=0;
@@ -80,6 +91,32 @@ int CheckDAT(DAT* dat)
    		legit++;
    	return legit;
 }
+
+//Return node if the node exists
+//Return NUll if does not exists
+//Return Node based on search string
+NODE* SearchNode(char* search_str)
+{
+	NODE* curr = calender.head;
+	NODE* prev = NULL;
+	while(curr != NULL)
+	{
+		if(strcmp(curr->event.name,search_str)==0)
+			return curr;
+		prev = curr;
+		curr = curr->next;
+	}
+	return NULL;
+}
+
+//Check whether name is unique or not.
+int CheckUniqueName(char* temp_title)
+{
+	if(SearchNode(temp_title)!=NULL)
+		return 0;
+	return 1;
+}
+
 char* ScanEventName()
 {
 	printf("Enter new event name (no more than 16 characters):");
@@ -95,15 +132,21 @@ char* ScanEventName()
 		{
 			char* return_title = NEW(char,i+1);
 			strncpy(return_title,temp_title,i+2);
-			if(CheckAN(return_title))
+			if(CheckAN(temp_title))
 			{
-				return return_title;
-			}
+				if(CheckUniqueName(temp_title))
+					return temp_title;
 			else
 			{
-				printf("Error! Only Alpha Numeric value\n");
+				printf("Error! Event name must be unique.\n");
 				return ScanEventName();
 			}
+	}
+	else
+	{
+		printf("Error! Only Alpha Numeric value\n");
+		return ScanEventName();
+	}
 		}
 	}
 	if(i<15)
@@ -115,7 +158,13 @@ char* ScanEventName()
 	temp_title[15] = '#';
 	if(CheckAN(temp_title))
 	{
-		return temp_title;
+		if(CheckUniqueName(temp_title))
+			return temp_title;
+		else
+		{
+			printf("Error! Event name must be unique.\n");
+			return ScanEventName();
+		}
 	}
 	else
 	{
@@ -229,7 +278,7 @@ int CompareDAT(NODE* node1, NODE* node2)
 		return 1;
 	else if(con1 && con2 && con3 && con4)
 	{
-		printf("Warning %s and %s have the same start time.\n",node1->event.name,node1->event.name);
+		printf("Warning %s and %s have the same start time.\n",node1->event.name,node2->event.name);
 		if(node1->event.end_DAT.month > node2->event.end_DAT.month)
 			return 1;
 		else if(con5 && (node1->event.end_DAT.date > node2->event.end_DAT.date))
@@ -271,6 +320,7 @@ int InsertNode(NODE* temp_node)
 {
 	NODE* curr = calender.head;
 	NODE* prev = NULL;
+	calender.number_of_nodes++;
 	while(curr!=NULL)
 	{
 		//CompareDAT will return 1 if curr time is greater than new node (temp_node)
@@ -316,7 +366,7 @@ int NewEvent()
 	temp_node->event.start_DAT = ScanDAT(1);
 	//scan event end time
 	temp_node->event.end_DAT = ScanDAT(2);
-	if(CompareTime(temp_node->event.end_DAT,temp_node->event.start_DAT))
+	if(!CompareTime(temp_node->event.end_DAT,temp_node->event.start_DAT))
 		printf("Error! Start time must be less than end time.\n");
 	}while(!CompareTime(temp_node->event.end_DAT,temp_node->event.start_DAT));
 	
@@ -358,19 +408,7 @@ int DeleteEvent()
 	printf("%s has been deleted\n",search_str);
 	return 0;
 }
-NODE* SearchNode(char* search_str)
-{
-	NODE* curr = calender.head;
-	NODE* prev = NULL;
-	while(curr != NULL)
-	{
-		if(strcmp(curr->event.name,search_str)==0)
-			return curr;
-		prev = curr;
-		curr = curr->next;
-	}
-	return NULL;
-}
+
 
 int OptionModifyEventMenu(NODE* temp_node)
 {
